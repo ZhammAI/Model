@@ -1,0 +1,45 @@
+# model/data/historical/meta_history.json
+
+{
+    "meta_trends": {
+        "ai": {
+            "daily_data": [
+                {
+                    "date": "2024-01-01",
+                    "mentions": 1500,
+                    "sentiment_score": 0.75,
+                    "volume_total": 5000000,
+                    "active_tokens": 25,
+                    "top_tokens": [
+                        {
+                            "name": "SOLAI",
+                            "volume_24h": 1000000,
+                            "price_change": 15.5,
+                            "market_cap": 2000000
+                        }
+                    ],
+                    "trend_score": 85
+                }
+            ],
+            "performance_metrics": {
+                "accuracy": 0.82,
+                "prediction_success": 0.78,
+                "false_positives": 0.15
+            }
+        },
+        "gaming": {},
+        "meme": {},
+        "defi": {}
+    },
+    "market_conditions": [
+        {
+            "date": "2024-01-01",
+            "overall_sentiment": "bullish",
+            "total_volume": 50000000,
+            "active_metas": ["ai", "gaming"],
+            "market_score": 75
+        }
+    ],
+    "version": "1.0.0",
+    "last_updated": "2024-01-01"
+}

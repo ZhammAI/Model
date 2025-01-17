@@ -1,0 +1,297 @@
+# backend/src/api/routes/tokens.py
+
+from fastapi import APIRouter, HTTPException, Query
+from typing import Dict, List, Optional
+from datetime import datetime
+
+router = APIRouter()
+
+# Mock data - replace with actual service integration
+MOCK_RUNNERS_DATA = {
+    "current": [
+        {
+            "name": "SOLAI",
+            "address": "SOL1234...",
+            "price": 0.00001234,
+            "price_change": 25.5,
+            "volume_24h": 150000,
+            "market_cap": 1000000,
+            "matched_meta": ["ai", "new"]
+        }
+    ],
+    "potential": [
+        {
+            "name": "SQUID2",
+            "address": "SOL5678...",
+            "price": 0.00000789,
+            "price_change": 15.2,
+            "volume_24h": 75000,
+            "market_cap": 500000,
+            "matched_meta": ["squid", "game"]
+        }
+    ]
+}
+
+@router.get("/runners")
+async def get_runners(
+    min_volume: Optional[float] = None,
+    min_price_change: Optional[float] = None
+):
+    """Get current and potential runners"""
+    try:
+        filtered_data = {
+            "current": [
+                runner for runner in MOCK_RUNNERS_DATA["current"]
+                if (not min_volume or runner["volume_24h"] >= min_volume) and
+                (not min_price_change or runner["price_change"] >= min_price_change)
+            ],
+            "potential": [
+                runner for runner in MOCK_RUNNERS_DATA["potential"]
+                if (not min_volume or runner["volume_24h"] >= min_volume) and
+                (not min_price_change or runner["price_change"] >= min_price_change)
+            ]
+        }
+        
+        return {
+            "status": "success",
+            "data": filtered_data,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/token/{address}")
+async def get_token_details(address: str):
+    """Get detailed information for a specific token"""
+    try:
+        return {
+            "status": "success",
+            "data": {
+                "name": "SOLAI",
+                "symbol": "SOLAI",
+                "address": address,
+                "decimals": 9,
+                "price": 0.00001234,
+                "price_change_24h": 25.5,
+                "volume_24h": 150000,
+                "market_cap": 1000000,
+                "holders": 1500,
+                "liquidity": {
+                    "usd": 100000,
+                    "sol": 500
+                },
+                "meta_tags": ["ai", "new"],
+                "social_metrics": {
+                    "twitter_followers": 5000,
+                    "telegram_members": 2500,
+                    "sentiment_score": 75
+                },
+                "contract_metrics": {
+                    "is_mintable": False,
+                    "owner_balance_percentage": 5.5,
+                    "top_holders": [
+                        {"address": "SOLS123...", "percentage": 3.5}
+                    ]
+                }
+            }
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/meta/{meta_name}/tokens")
+async def get_tokens_by_meta(
+    meta_name: str,
+    min_volume: Optional[float] = None,
+    limit: int = Query(default=10, le=50)
+):
+    """Get tokens associated with a specific meta trend"""
+    try:
+        tokens = [
+            {
+                "name": f"Token{i}",
+                "address": f"SOL{i}...",
+                "price": 0.0001 * i,
+                "volume_24h": 10000 * i,
+                "price_change": 5.0 * i
+            }
+            for i in range(1, limit + 1)
+        ]
+        
+        if min_volume:
+            tokens = [t for t in tokens if t["volume_24h"] >= min_volume]
+            
+        return {
+            "status": "success",
+            "data": {
+                "meta_name": meta_name,
+                "tokens": tokens,
+                "total_volume": sum(t["volume_24h"] for t in tokens),
+                "average_performance": sum(t["price_change"] for t in tokens) / len(tokens)
+            }
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/analytics")
+async def get_token_analytics():
+    """Get overall token market analytics"""
+    try:
+        return {
+            "status": "success",
+            "data": {
+                "market_summary": {
+                    "total_tokens": 1500,
+                    "active_tokens": 750,
+                    "total_volume_24h": 25000000,
+                    "average_roi": 15.5
+                },
+                "distribution": {
+                    "by_meta": [
+                        {"meta": "ai", "count": 250, "volume": 5000000},
+                        {"meta": "game", "count": 180, "volume": 3000000}
+                    ],
+                    "by_age": [
+                        {"range": "0-24h", "count": 50},
+                        {"range": "1-7d", "count": 150}
+                    ]
+                },
+                "performance_metrics": {
+                    "best_performers": [
+                        {
+                            "name": "SOLAI",
+                            "roi_24h": 25.5,
+                            "volume": 150000
+                        },
+                        {
+                            "name": "SQUID2",
+                            "roi_24h": 15.2,
+                            "volume": 75000
+                        }
+                    ],
+                    "trending_metas": [
+                        {
+                            "name": "ai",
+                            "token_count": 250,
+                            "average_roi": 20.5
+                        }
+                    ]
+                }
+            }
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/screener")
+async def token_screener(
+    min_volume: Optional[float] = None,
+    min_holders: Optional[int] = None,
+    min_liquidity: Optional[float] = None,
+    meta_tags: Optional[List[str]] = Query(None),
+    sort_by: Optional[str] = "volume_24h",
+    limit: int = Query(default=50, le=100)
+):
+    """Screen tokens based on various criteria"""
+    try:
+        # Mock screener results
+        tokens = [
+            {
+                "name": f"Token{i}",
+                "address": f"SOL{i}...",
+                "price": 0.0001 * i,
+                "price_change_24h": 5.0 * i,
+                "volume_24h": 10000 * i,
+                "market_cap": 100000 * i,
+                "holders": 100 * i,
+                "liquidity_usd": 50000 * i,
+                "meta_tags": ["ai"] if i % 2 == 0 else ["game"],
+                "score": 85 - (i % 20)
+            }
+            for i in range(1, limit + 1)
+        ]
+
+        # Apply filters
+        if min_volume:
+            tokens = [t for t in tokens if t["volume_24h"] >= min_volume]
+        if min_holders:
+            tokens = [t for t in tokens if t["holders"] >= min_holders]
+        if min_liquidity:
+            tokens = [t for t in tokens if t["liquidity_usd"] >= min_liquidity]
+        if meta_tags:
+            tokens = [t for t in tokens if any(tag in t["meta_tags"] for tag in meta_tags)]
+
+        # Sort results
+        tokens.sort(key=lambda x: x[sort_by], reverse=True)
+
+        return {
+            "status": "success",
+            "data": {
+                "tokens": tokens[:limit],
+                "total_matches": len(tokens),
+                "summary": {
+                    "average_volume": sum(t["volume_24h"] for t in tokens) / len(tokens),
+                    "average_holders": sum(t["holders"] for t in tokens) / len(tokens)
+                }
+            }
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/validate")
+async def validate_token(token_data: Dict):
+    """Validate a token's metrics and potential"""
+    try:
+        # Mock validation logic
+        validation_result = {
+            "is_valid": True,
+            "risk_score": 25,
+            "warnings": [],
+            "metrics": {
+                "liquidity_score": 85,
+                "holder_distribution": "healthy",
+                "contract_safety": "high"
+            }
+        }
+
+        # Add mock warnings based on token data
+        if token_data.get("holders", 0) < 100:
+            validation_result["warnings"].append("Low holder count")
+            validation_result["risk_score"] += 10
+
+        if token_data.get("owner_balance_percentage", 0) > 10:
+            validation_result["warnings"].append("High owner balance")
+            validation_result["risk_score"] += 15
+
+        return {
+            "status": "success",
+            "data": validation_result
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/trending")
+async def get_trending_tokens(
+    timeframe: str = Query("24h", regex="^(1h|24h|7d)$"),
+    limit: int = Query(default=10, le=50)
+):
+    """Get trending tokens based on various metrics"""
+    try:
+        return {
+            "status": "success",
+            "data": {
+                "tokens": [
+                    {
+                        "name": "SOLAI",
+                        "symbol": "SOLAI",
+                        "address": "SOL1234...",
+                        "price_change": 25.5,
+                        "volume_change": 150.2,
+                        "social_volume": 8500,
+                        "trend_score": 95
+                    }
+                ],
+                "timeframe": timeframe,
+                "updated_at": datetime.utcnow().isoformat()
+            }
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
